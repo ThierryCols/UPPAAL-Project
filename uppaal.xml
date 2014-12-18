@@ -81,48 +81,78 @@
 	</template>
 	<template>
 		<name>Medium</name>
-		<location id="id7" x="0" y="0">
+		<location id="id7" x="-339" y="43">
+			<name x="-349" y="9">COLLISION</name>
 		</location>
-		<init ref="id7"/>
-	</template>
-	<template>
-		<name x="5" y="5">Receiver</name>
-		<declaration>// Place local declarations here.</declaration>
-		<location id="id8" x="-1028" y="-297">
-			<name x="-1038" y="-331">SEND_ACK</name>
+		<location id="id8" x="-365" y="-297">
+			<name x="-375" y="-331">BUSY</name>
 		</location>
-		<location id="id9" x="-748" y="-297">
-			<name x="-758" y="-331">RECEIVED_DATA</name>
+		<location id="id9" x="-722" y="-297">
+			<name x="-732" y="-331">IDLE</name>
 		</location>
-		<location id="id10" x="-442" y="-297">
-			<name x="-452" y="-331">WAIT_DATA</name>
-		</location>
-		<location id="id11" x="-442" y="-509">
-			<name x="-452" y="-543">SEND_CTS</name>
-		</location>
-		<location id="id12" x="-731" y="-518">
-			<name x="-741" y="-552">WAIT_SIFS</name>
-		</location>
-		<location id="id13" x="-1028" y="-509">
-			<name x="-1038" y="-543">IDLE</name>
-		</location>
-		<init ref="id13"/>
+		<init ref="id9"/>
 		<transition>
-			<source ref="id12"/>
-			<target ref="id13"/>
-			<nail x="-858" y="-424"/>
+			<source ref="id7"/>
+			<target ref="id7"/>
+			<nail x="-305" y="145"/>
+			<nail x="-229" y="68"/>
 		</transition>
 		<transition>
 			<source ref="id8"/>
-			<target ref="id13"/>
+			<target ref="id8"/>
+			<nail x="-238" y="-271"/>
+			<nail x="-254" y="-382"/>
+		</transition>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id9"/>
+			<nail x="-535" y="-220"/>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id9"/>
+			<nail x="-722" y="34"/>
+		</transition>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id7"/>
 		</transition>
 		<transition>
 			<source ref="id9"/>
 			<target ref="id8"/>
+			<nail x="-535" y="-356"/>
+		</transition>
+	</template>
+	<template>
+		<name x="5" y="5">Receiver</name>
+		<declaration>// Place local declarations here.</declaration>
+		<location id="id10" x="-1028" y="-297">
+			<name x="-1038" y="-331">SEND_ACK</name>
+		</location>
+		<location id="id11" x="-748" y="-297">
+			<name x="-758" y="-331">RECEIVED_DATA</name>
+		</location>
+		<location id="id12" x="-442" y="-297">
+			<name x="-452" y="-331">WAIT_DATA</name>
+		</location>
+		<location id="id13" x="-442" y="-509">
+			<name x="-452" y="-543">SEND_CTS</name>
+		</location>
+		<location id="id14" x="-731" y="-518">
+			<name x="-741" y="-552">WAIT_SIFS</name>
+		</location>
+		<location id="id15" x="-1028" y="-509">
+			<name x="-1038" y="-543">IDLE</name>
+		</location>
+		<init ref="id15"/>
+		<transition>
+			<source ref="id14"/>
+			<target ref="id15"/>
+			<nail x="-858" y="-424"/>
 		</transition>
 		<transition>
 			<source ref="id10"/>
-			<target ref="id9"/>
+			<target ref="id15"/>
 		</transition>
 		<transition>
 			<source ref="id11"/>
@@ -135,6 +165,14 @@
 		<transition>
 			<source ref="id13"/>
 			<target ref="id12"/>
+		</transition>
+		<transition>
+			<source ref="id14"/>
+			<target ref="id13"/>
+		</transition>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id14"/>
 			<nail x="-1020" y="-518"/>
 		</transition>
 	</template>
