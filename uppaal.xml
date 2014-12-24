@@ -1,20 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
-	<declaration>// Place global declarations here.</declaration>
+	<declaration>// Place global declarations here.
+
+// two variables used to store the ID of the process that is sending and that of the process that is receiving
+int senderID, receiverID;
+
+int DIFS = 128;
+int SIFS = 28;
+int SLOTTIME = 50;
+int DATA_TIME_MIN = 224;
+int DATA_TIME_MAW = 15717;
+int ACK_TIME = 205;
+int RTS_TIME = 300;
+int CTS_TIME = 205;
+int CTS_timeout = 400;
+int ACK_timeout = 400;
+
+// an extra global clock is used to keep track of the total amount of time (it is never reset)
+clock globalTime;
+
+broadcast chan MEDIUM_BUSY, MEDIUM_FREE;
+
+chan M, RTS, CTS, DATA, ACK;
+</declaration>
 	<template>
 		<name>Sender</name>
+		<declaration>
+clock x; // clock
+int bc;</declaration>
 		<location id="id0" x="-254" y="-25">
 			<name x="-264" y="-59">FREEZE</name>
 		</location>
 		<location id="id1" x="-450" y="-170">
-			<name x="-477" y="-220">BACK_OFF</name>
+			<name x="-467" y="-221">BACK_OFF</name>
 		</location>
 		<location id="id2" x="-594" y="111">
 			<name x="-604" y="77">WAIT_ACK</name>
 		</location>
 		<location id="id3" x="-144" y="102">
-			<name x="-154" y="68">SEND_DATA</name>
+			<name x="-127" y="76">SEND_DATA</name>
 		</location>
 		<location id="id4" x="-152" y="-365">
 			<name x="-162" y="-399">WAIT_CTS</name>
@@ -35,6 +60,7 @@
 		<transition>
 			<source ref="id0"/>
 			<target ref="id1"/>
+			<label kind="synchronisation" x="-348" y="-170">MEDIUM_BUSY?</label>
 			<nail x="-305" y="-136"/>
 		</transition>
 		<transition>
@@ -53,30 +79,41 @@
 		<transition>
 			<source ref="id1"/>
 			<target ref="id5"/>
+			<label kind="guard" x="-569" y="-263">bc == 0</label>
 		</transition>
 		<transition>
 			<source ref="id4"/>
 			<target ref="id1"/>
+			<label kind="guard" x="-323" y="-263">x &gt; CTS_timeout</label>
 		</transition>
 		<transition>
 			<source ref="id2"/>
 			<target ref="id6"/>
+			<label kind="guard" x="-782" y="-68">x &lt;= ACK_timeout</label>
+			<label kind="synchronisation" x="-705" y="-51">ACK?</label>
 		</transition>
 		<transition>
 			<source ref="id3"/>
 			<target ref="id2"/>
+			<label kind="synchronisation" x="-382" y="85">DATA!</label>
+			<label kind="assignment" x="-391" y="110">x:= 0</label>
 		</transition>
 		<transition>
 			<source ref="id4"/>
 			<target ref="id3"/>
+			<label kind="guard" x="-136" y="-170">x &lt;= CTS_timeout</label>
+			<label kind="synchronisation" x="-136" y="-144">CTS?</label>
 		</transition>
 		<transition>
 			<source ref="id5"/>
 			<target ref="id4"/>
+			<label kind="synchronisation" x="-408" y="-382">RTS!</label>
+			<label kind="assignment" x="-425" y="-348">x:= 0</label>
 		</transition>
 		<transition>
 			<source ref="id6"/>
 			<target ref="id5"/>
+			<label kind="guard" x="-695" y="-297">x == DIFS</label>
 		</transition>
 	</template>
 	<template>
@@ -99,33 +136,31 @@
 		</transition>
 		<transition>
 			<source ref="id8"/>
-			<target ref="id8"/>
-			<nail x="-238" y="-271"/>
-			<nail x="-254" y="-382"/>
-		</transition>
-		<transition>
-			<source ref="id8"/>
 			<target ref="id9"/>
+			<label kind="synchronisation" x="-586" y="-272">MEDIUM_FREE!</label>
 			<nail x="-535" y="-220"/>
 		</transition>
 		<transition>
 			<source ref="id7"/>
 			<target ref="id9"/>
+			<label kind="synchronisation" x="-646" y="8">MEDIUM_FREE!</label>
 			<nail x="-722" y="34"/>
 		</transition>
 		<transition>
 			<source ref="id8"/>
 			<target ref="id7"/>
+			<label kind="synchronisation" x="-340" y="-144">M?</label>
 		</transition>
 		<transition>
 			<source ref="id9"/>
 			<target ref="id8"/>
+			<label kind="synchronisation" x="-544" y="-391">M?</label>
 			<nail x="-535" y="-356"/>
 		</transition>
 	</template>
 	<template>
 		<name x="5" y="5">Receiver</name>
-		<declaration>// Place local declarations here.</declaration>
+		<declaration>clock y;</declaration>
 		<location id="id10" x="-1028" y="-297">
 			<name x="-1038" y="-331">SEND_ACK</name>
 		</location>
@@ -148,39 +183,62 @@
 		<transition>
 			<source ref="id14"/>
 			<target ref="id15"/>
+			<label kind="synchronisation" x="-918" y="-476">MEDIUM_BUSY?</label>
 			<nail x="-858" y="-424"/>
 		</transition>
 		<transition>
 			<source ref="id10"/>
 			<target ref="id15"/>
+			<label kind="synchronisation" x="-1020" y="-425">ACK!</label>
 		</transition>
 		<transition>
 			<source ref="id11"/>
 			<target ref="id10"/>
+			<label kind="assignment" x="-918" y="-289">y := SIFS</label>
 		</transition>
 		<transition>
 			<source ref="id12"/>
 			<target ref="id11"/>
+			<label kind="synchronisation" x="-595" y="-323">DATA?</label>
+			<label kind="assignment" x="-603" y="-289">y:= 0</label>
 		</transition>
 		<transition>
 			<source ref="id13"/>
 			<target ref="id12"/>
+			<label kind="synchronisation" x="-433" y="-425">CTS!</label>
 		</transition>
 		<transition>
 			<source ref="id14"/>
 			<target ref="id13"/>
+			<label kind="synchronisation" x="-629" y="-535">MEDIUM_FREE?</label>
 		</transition>
 		<transition>
 			<source ref="id15"/>
 			<target ref="id14"/>
+			<label kind="synchronisation" x="-901" y="-544">RTS?</label>
+			<label kind="assignment" x="-1002" y="-518">y:= 0</label>
 			<nail x="-1020" y="-518"/>
 		</transition>
 	</template>
 	<system>// Place template instantiations here.
-Process = Template();
+
+S1 = Sender();
+S2 = Sender();
+
+R1 = Receiver();
+R2 = Receiver();
+
+medium = Medium();
+
 // List one or more processes to be composed into a system.
-system Process;
+system R1, R2, S1, S2, medium;
     </system>
 	<queries>
+		<query>
+			<formula>A[] not deadlock
+			</formula>
+			<comment>
+			</comment>
+		</query>
 	</queries>
 </nta>
